@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.json.JSONArray;
@@ -108,8 +109,8 @@ public class ListSellerActivity extends Activity {
                         order.seller = orderObj.getString("seller");
                         order.price = orderObj.getDouble("price");
                         order.status = orderObj.getInt("status");
-                        order.expected_date = orderObj.getString("expected_date");
-                        order.payment_info = orderObj.getString("payment_info");
+                        order.expectedDate = orderObj.getString("expected_date");
+                        order.paymentInfo = orderObj.getString("payment_info");
                         order.desc = orderObj.getString("desc");
                         dataset.add(order);
                     }
@@ -140,21 +141,28 @@ public class ListSellerActivity extends Activity {
             public TextView mLabelStore;
             public TextView mLabelStatus;
             public TextView mLabelName;
-            public Button mButton;
+            public LinearLayout mItem;
 
             public ListSellerViewHolder(View v) {
                 super(v);
                 mLabelStore = v.findViewById(R.id.label_store);
                 mLabelStatus = v.findViewById(R.id.label_status);
                 mLabelName = v.findViewById(R.id.label_name);
-               /* mButton = v.findViewById(R.id.button);
-                mButton.setTag(this);
-                mButton.setOnClickListener(new View.OnClickListener() {
+                mItem = v.findViewById(R.id.item);
+                mItem.setTag(this);
+                mItem.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
                         ListSellerViewHolder vh = (ListSellerViewHolder) v.getTag();
-                        Log.i("lulz", vh.mInfo.code);
+                        vh.open();
                     }
-                });*/
+                });
+            }
+
+            public void open() {
+                Intent i = new Intent(getApplicationContext(), DetailActivity.class);
+                i.putExtra("sessionInfo", mSessionInfo);
+                i.putExtra("orderInfo", mInfo);
+                startActivity(i);
             }
         }
 
@@ -175,22 +183,8 @@ public class ListSellerActivity extends Activity {
         public void onBindViewHolder(ListSellerViewHolder holder, int position) {
             holder.mInfo = mDataset.get(position);
             holder.mLabelStore.setText(holder.mInfo.name);
-            holder.mLabelName.setText(String.format("%.2f (%s)", holder.mInfo.price, holder.mInfo.payment_info));
-
-            String statusText = "";
-            switch (holder.mInfo.status) {
-                case 0:
-                    statusText = "Pendente";
-                    break;
-                case 1:
-                    statusText = "Previsão de chegada: " + holder.mInfo.expected_date;
-                    break;
-                case 2:
-                    statusText = "Pronto para retirada desde " + holder.mInfo.expected_date;
-                    break;
-            }
-
-            holder.mLabelStatus.setText(statusText);
+            holder.mLabelName.setText(holder.mInfo.getPaymentText());
+            holder.mLabelStatus.setText(holder.mInfo.getStatusText());
         }
 
         @Override

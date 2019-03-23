@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.json.JSONArray;
@@ -106,12 +107,12 @@ public class ListUserActivity extends Activity {
                         order.code = orderObj.getString("code");
                         order.name = orderObj.getString("name");
                         order.store = orderObj.getJSONObject("store").getString("name");
-                        order.store_addr = orderObj.getJSONObject("store").getString("addr");
+                        order.storeAddr = orderObj.getJSONObject("store").getString("addr");
                         order.seller = orderObj.getJSONObject("store").getString("seller");
                         order.price = orderObj.getDouble("price");
                         order.status = orderObj.getInt("status");
-                        order.expected_date = orderObj.getString("expected_date");
-                        order.payment_info = orderObj.getString("payment_info");
+                        order.expectedDate = orderObj.getString("expected_date");
+                        order.paymentInfo = orderObj.getString("payment_info");
                         order.link = orderObj.getString("link");
                         order.desc = orderObj.getString("desc");
                         dataset.add(order);
@@ -142,21 +143,28 @@ public class ListUserActivity extends Activity {
             public TextView mLabelStore;
             public TextView mLabelStatus;
             public TextView mLabelName;
-            public Button mButton;
+            public LinearLayout mItem;
 
             public ListUserViewHolder(View v) {
                 super(v);
                 mLabelStore = v.findViewById(R.id.label_store);
                 mLabelStatus = v.findViewById(R.id.label_status);
                 mLabelName = v.findViewById(R.id.label_name);
-               /* mButton = v.findViewById(R.id.button);
-                mButton.setTag(this);
-                mButton.setOnClickListener(new View.OnClickListener() {
+                mItem = v.findViewById(R.id.item);
+                mItem.setTag(this);
+                mItem.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
                         ListUserViewHolder vh = (ListUserViewHolder) v.getTag();
-                        Log.i("lulz", vh.mInfo.code);
+                        vh.open();
                     }
-                });*/
+                });
+            }
+
+            public void open() {
+                Intent i = new Intent(getApplicationContext(), DetailActivity.class);
+                i.putExtra("sessionInfo", mSessionInfo);
+                i.putExtra("orderInfo", mInfo);
+                startActivity(i);
             }
         }
 
@@ -177,22 +185,8 @@ public class ListUserActivity extends Activity {
         public void onBindViewHolder(ListUserViewHolder holder, int position) {
             holder.mInfo = mDataset.get(position);
             holder.mLabelStore.setText(holder.mInfo.store);
-            holder.mLabelName.setText("O produto será retirado por " + holder.mInfo.name);
-
-            String statusText = "";
-            switch (holder.mInfo.status) {
-                case 0:
-                    statusText = "Pendente";
-                    break;
-                case 1:
-                    statusText = "Previsão de chegada: " + holder.mInfo.expected_date;
-                    break;
-                case 2:
-                    statusText = "Pronto para retirada desde " + holder.mInfo.expected_date;
-                    break;
-            }
-
-            holder.mLabelStatus.setText(statusText);
+            holder.mLabelName.setText(holder.mInfo.getNameText());
+            holder.mLabelStatus.setText(holder.mInfo.getStatusText());
         }
 
         @Override
